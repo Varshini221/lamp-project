@@ -2,6 +2,10 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+
+from brain import ask_brite
+from voice import speak
+
 import urllib.request
 import os
 
@@ -22,6 +26,7 @@ detector = vision.FaceDetector.create_from_options(options)
 
 cap = cv2.VideoCapture(0)
 
+face = True
 while cap.isOpened():
     success, frame = cap.read()
 
@@ -40,6 +45,14 @@ while cap.isOpened():
 
     face_detected = len(results.detections) > 0
 
+    if face_detected and not face:
+        response = ask_brite("A person just looked at me for the first time!")
+        speak(response["speech"])        
+    elif not face_detected and face:
+        print("face just left")
+
+    face = face_detected
+
     if face_detected:
         color = (0, 255, 0)
         message = "FACE DETECTED"
@@ -54,6 +67,7 @@ while cap.isOpened():
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
 
 cap.release()
 cv2.destroyAllWindows()
